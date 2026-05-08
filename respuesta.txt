@@ -1,0 +1,22 @@
+1.¿Cómo evitás duplicados?
+
+Para evitar duplicados, el backend normaliza el nombre y la ubicación del nuevo lugar a agregar.
+En el flujo automatizado se buscan candidatos similares utilizando el endpoint /lugares/candidatos.
+Si el nombre es parecido o igual al de alguno de los candidatos, la IA compara la ubicación y decide si es duplicado o no.
+
+2.¿Cómo escalarías este sistema?
+
+Para escalar este sistema, usaría instancias de backend distintas,
+ya que el flujo puede tratar con muchos datos y al haber una sola instancia sobrecargaría el servidor
+por lo que podría afectar el rendimiento de la aplicación.
+
+3.¿Qué problemas puede tener este flujo?
+
+Uno de los problemas es el costo y consumo de tokens del modelo de IA al procesar grandes cantidades de datos.
+Además, puede cometer errores de interpretación y realizar detecciones de duplicados erróneas.
+También pueden existir inconsistencias en los datos de entrada, como nombres escritos de diferentes maneras o ubicaciones incompletas.
+
+4.¿Cómo mejorarías la calidad de los datos?
+
+Mejoraría la calidad de los datos incorporando reglas de validación más avanzadas,
+mejores normalizaciones y controles sobre los formatos de entrada.

@@ -1,0 +1,474 @@
+{
+  "name": "flujo_prueba_tec",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        240
+      ],
+      "id": "00236fc5-60d5-46d1-aa98-73ac00d412e1",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "=http://localhost:3000/lugares/candidatos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "nombre",
+              "value": "={{ $json.nombre }}"
+            },
+            {
+              "name": "ubicacion",
+              "value": "={{ $json.ubicacion }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        112,
+        256
+      ],
+      "id": "6f0ffe7a-791e-41bb-839a-469133edaae5",
+      "name": "obtener candidatos",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      nombre: \"Sushi Flow Tucumán\",\n      tipo: \"B\",\n      categoria: \"restaurante\",\n      ubicacion: \"San Miguel de Tucumán\",\n      fuente: \"n8n\"\n    } \n  },\n  {\n    json: {\n      nombre: \"Cafe 25\",\n      tipo: \"B\",\n      categoria: \"cafe\",\n      ubicacion: \"Yerba Buena\",\n      fuente: \"n8n\"\n    }\n  },\n  {\n    json: {\n      nombre: \"irlanda tuc\",\n      tipo: \"B\",\n      categoria: \"bar\",\n      ubicacion: \"San Miguel de Tucumán\",\n      fuente: \"n8n\"\n    } \n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        240
+      ],
+      "id": "9d8d4a5e-44b5-4c7a-b9a8-28890bd7d94b",
+      "name": "dataset"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/lugares/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "nombre",
+              "value": "={{ $('Loop Over Items').item.json.nombre }}"
+            },
+            {
+              "name": "tipo",
+              "value": "={{ $('Loop Over Items').item.json.tipo }}"
+            },
+            {
+              "name": "categoria",
+              "value": "={{ $('Loop Over Items').item.json.categoria }}"
+            },
+            {
+              "name": "ubicacion",
+              "value": "={{ $('Loop Over Items').item.json.ubicacion }}"
+            },
+            {
+              "name": "fecha_evento",
+              "value": "={{ $('Loop Over Items').item.json.fecha_evento ?? null }}"
+            },
+            {
+              "name": "fuente",
+              "value": "={{ $('Loop Over Items').item.json.fuente }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1616,
+        272
+      ],
+      "id": "4b9a3436-52f8-4494-a2f4-52b8c19e49be",
+      "name": "agregar lugar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c0708a23-d754-4040-9ac0-e2ea44431fb1",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "\"duplicado\": true",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1088,
+        256
+      ],
+      "id": "f8404820-40e3-446e-8a8f-15936b1db479",
+      "name": "duplicado?"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        352,
+        256
+      ],
+      "id": "35b4e890-f56b-41f2-a78b-29bbf2fab6e9",
+      "name": "array de candidatos",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eres un sistema de detección de duplicados de lugares.\n\nTu trabajo es decidir si el Lugar nuevo representa exactamente el mismo lugar físico que alguno de los candidatos.\n\nREGLAS OBLIGATORIAS:\n- Si la ubicación es diferente, responde:\n{\n  \"duplicado\": false\n}\n\n- Solo responde:\n{\n  \"duplicado\": true\n}\nsi el nombre y la ubicación representan claramente el mismo lugar físico.\n\n- Diferentes ciudades, barrios o zonas significan no duplicado.\n\nLugar nuevo:\nNombre: {{ $node[\"Loop Over Items\"].json.nombre }}\nUbicación: {{ $node[\"Loop Over Items\"].json.ubicacion }}\n\ncandidatos:\n{{ JSON.stringify($json.data) }}\n\nRESPONDE SOLO JSON VÁLIDO.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "="
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        720,
+        96
+      ],
+      "id": "a9bddb95-9eab-431f-a3e7-5040b295aa9d",
+      "name": "Basic LLM Chain",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        720,
+        240
+      ],
+      "id": "bb1e3cc1-7c2a-4eda-a7eb-e03659226cfd",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "g0N6BREu7NxNVzf0",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -176,
+        240
+      ],
+      "id": "e5046fd2-9264-4136-855f-4aa865878378",
+      "name": "Loop Over Items",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1298ce6d-7571-4971-9ac0-8bdc027bc2af",
+              "leftValue": "={{ $json.data[0].isEmpty() }}",
+              "rightValue": {},
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        736,
+        -144
+      ],
+      "id": "3db0a610-5d56-49fd-97b2-f9f2f8e75da9",
+      "name": "array vacío?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3cb17528-2f0b-4ce5-8fa8-83751b9ddb0e",
+              "name": "resultado",
+              "value": "=agregado",
+              "type": "string"
+            },
+            {
+              "id": "3495222b-d988-483a-802d-2de416cf0ade",
+              "name": "detalle",
+              "value": "={{ $('Loop Over Items').item.json.nombre }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1856,
+        272
+      ],
+      "id": "14c0777c-7cf9-43a3-ac64-7cd5e56405df",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "96331b02-d29e-4ee2-ac7b-bf9ec1f544c2",
+              "name": "resultado",
+              "value": "duplicado",
+              "type": "string"
+            },
+            {
+              "id": "d6a1a33e-cbdd-47dc-a26b-ab3c9eff362c",
+              "name": "detalle",
+              "value": "={{ $('Loop Over Items').item.json.nombre }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        544
+      ],
+      "id": "d82b4d37-67cf-4f7b-b74a-45ad9a751381",
+      "name": "Edit Fields1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dataset": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener candidatos": {
+      "main": [
+        [
+          {
+            "node": "array de candidatos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "duplicado?": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "agregar lugar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "array de candidatos": {
+      "main": [
+        [
+          {
+            "node": "array vacío?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "obtener candidatos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "duplicado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agregar lugar": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "array vacío?": {
+      "main": [
+        [
+          {
+            "node": "agregar lugar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "227e2fff-dbee-4c33-90b7-0b649e93ba5b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6a92c2191b195eff0b18576c515cbff5c758e05d8a6991f7e04ac6c4cecb569a"
+  },
+  "id": "V2cqPy9pFMIH8wDC",
+  "tags": []
+}

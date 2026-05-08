@@ -1,79 +1,79 @@
-Prueba Técnica:
+# Prueba Técnica
 
-Stack Tecnológico
-Frontend: React.js con Vite.
+## Stack Tecnológico
 
-Backend: Node.js con Express.
+- **Frontend:** React.js con Vite.
+- **Backend:** Node.js con Express.
+- **Base de Datos:** MySQL.
+- **Automatización:** n8n e IA (Groq).
 
-Base de Datos: MySQL.
+---
 
-Automatización: n8n e IA (Groq).
+## Pasos para la Instalación
 
-Pasos para la Instalación
+### 1. Base de Datos
 
-1. Base de Datos
-   Debe contar con un servidor MySQL activo.
+Debe contar con un servidor **MySQL** activo.
 
-Localice el archivo script_db.sql en la raíz del proyecto.
+1. Localice el archivo `script_db.sql` en la raíz del proyecto.
+2. Ejecute el script en su cliente SQL.
+   _El proceso creará la base de datos `prueba_tecnica`, la tabla `lugares` e insertará registros iniciales._
 
-Ejecute el script en su cliente SQL.
+### 2. Backend
 
-El proceso creará la base de datos prueba_tecnica, la tabla lugares e insertará registros iniciales.
+Acceda a la carpeta del servidor:
+`cd backend`
 
-2. Backend
-   Acceda a la carpeta del servidor:
-   cd backend
+**Instale las dependencias necesarias:**
+`npm install`
 
-Instale las dependencias necesarias:
-npm install
+**Configure las variables de entorno:**
 
-Configure las variables de entorno:
+1. Renombre el archivo `.env.example` a `.env`.
+2. Complete los campos con las credenciales de su base de datos local (**Host, Usuario, Contraseña**).
 
-Renombre el archivo .env.example a .env.
+**Inicie el servicio:**
+`node index.js`
 
-Complete los campos con las credenciales de su base de datos local (Host, Usuario, Contraseña).
+### 3. Frontend
 
-Inicie el servicio:
-node index.js
+Acceda a la carpeta de la interfaz:
+`cd frontend`
 
-3. Frontend
-   Acceda a la carpeta de la interfaz:
-   cd frontend
+**Instale las dependencias:**
+`npm install`
 
-Instale las dependencias:
-npm install
+**Configure el entorno:**
 
-Configure el entorno:
+1. Renombre el archivo `.env.example` a `.env`.
+2. Verifique que la variable **VITE_API_URL** coincida con la dirección de su backend (por defecto **http://localhost:3000**).
 
-Renombre el archivo .env.example a .env.
+**Inicie la aplicación:**
+`npm run dev`
 
-Verifique que la variable VITE_API_URL coincida con la dirección de su backend (por defecto http://localhost:3000).
+_La aplicación estará disponible en: http://localhost:5173_
 
-Inicie la aplicación:
-npm run dev
+---
 
-La aplicación estará disponible en: http://localhost:5173
+## Automatización con n8n e IA
 
-Automatización con n8n e IA
-El proyecto incluye un flujo ubicado en la carpeta /n8n, encargado de la inserción automática de datos.
+El proyecto incluye un flujo ubicado en la carpeta **/n8n**, encargado de la inserción automática de datos.
 
-Funcionamiento del flujo:
-Lectura de Dataset: Procesa una lista de nuevos lugares (bares o eventos) a agregar.
+### Funcionamiento del flujo:
 
-Búsqueda de Candidatos: Realiza consultas a la API del backend para identificar registros existentes con nombres similares.
+- **Lectura de Dataset:** Procesa una lista de nuevos lugares (bares o eventos) a agregar.
+- **Búsqueda de Candidatos:** Realiza consultas a la API del backend para identificar registros existentes con nombres similares.
+- **Procesamiento con IA:** Utiliza el modelo de lenguaje de **Groq** para comparar el dataset con los candidatos y determinar si son duplicados.
+- **Carga de no repetidos:** Los lugares nuevos que no son duplicados son enviados al backend, para su posterior inserción en la base de datos.
 
-Procesamiento con IA: Utiliza el modelo de lenguaje de Groq para comparar el dataset con los candidatos y determinar si son duplicados.
+### Configuración de la IA:
 
-Carga de no repetidos: Los lugares nuevos que no son duplicados son enviados al backend, para su posterior inserción en la base de datos.
+El flujo requiere una conexión con la **API de Groq** para operar.
 
-Configuración de la IA:
-El flujo requiere una conexión con la API de Groq para operar.
+1. Genere una **API Key** en el panel de **Groq Cloud**.
+2. En su instancia de n8n, cree una nueva credencial de tipo **Groq API** y vincule su llave.
+3. Asegúrese de que el nodo **Groq Chat Model** esté configurado para utilizar dicha credencial.
 
-Genere una API Key en el panel de Groq Cloud.
+### Ejecución:
 
-En su instancia de n8n, cree una nueva credencial de tipo Groq API y vincule su llave.
-
-Asegúrese de que el nodo Groq Chat Model esté configurado para utilizar dicha credencial.
-
-Ejecución:
-Para probar esta funcionalidad, importe el archivo n8n/flujo_prueba_tec.json en su instancia de n8n. Es necesario que el backend esté en ejecución para permitir la comunicación de los nodos HTTP.
+Para probar esta funcionalidad, importe el archivo **n8n/flujo_prueba_tec.json** en su instancia de n8n. Es necesario que el **backend esté en ejecución** para permitir la comunicación de los nodos HTTP.
